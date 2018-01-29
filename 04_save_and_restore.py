@@ -76,7 +76,7 @@ def get_fully_connected_layer(layer_num, input, output_size, use_relu=True):
 
 	return y
 
-def main():
+def main(restore):
 	data = input_data.read_data_sets(os.path.join('data', 'MNIST'), one_hot=True)
 
 	image_flat_size = data.train.images.shape[1]
@@ -150,27 +150,28 @@ def main():
 		best_validation_accuracy = -1
 		last_improvement = 0
 
-		# for i in range(10000):
-		# 	x_batch , y_batch = data.train.next_batch(batch_size)
-		# 	x_batch = x_batch.reshape(x_batch.shape[0], image_size, image_size, 1)
-		# 	feed_dict = {X : x_batch, Y: y_batch}
-		# 	cost_val, _ = session.run([cost, optimizer], feed_dict = feed_dict)
-		# 	if i%100 == 0:
-		# 		print("Cost at {} is :\t{}".format(i,cost_val))
-		# 		x_validation, y_validation = data.validation.images, data.validation.labels
-		# 		x_validation = x_validation.reshape(x_validation.shape[0], image_size, image_size, 1)
+		for i in range(10000):
+			x_batch , y_batch = data.train.next_batch(batch_size)
+			x_batch = x_batch.reshape(x_batch.shape[0], image_size, image_size, 1)
+			feed_dict = {X : x_batch, Y: y_batch}
+			cost_val, _ = session.run([cost, optimizer], feed_dict = feed_dict)
+			if i%100 == 0:
+				print("Cost at {} is :\t{}".format(i,cost_val))
+				x_validation, y_validation = data.validation.images, data.validation.labels
+				x_validation = x_validation.reshape(x_validation.shape[0], image_size, image_size, 1)
 
-		# 		feed_valid_dict = {X: x_validation, Y: y_validation, Y_true_class: data_validation_class}
-		# 		acc = session.run(accuracy, feed_dict = feed_valid_dict)
+				feed_valid_dict = {X: x_validation, Y: y_validation, Y_true_class: data_validation_class}
+				acc = session.run(accuracy, feed_dict = feed_valid_dict)
 
-		# 		if best_validation_accuracy < acc:
-		# 			best_validation_accuracy = acc
-		# 			last_improvement = i
-		# 			saver.save(sess=session, save_path=save_path)
-		# 			print("Accuracy on Validation set is \t{}".format(acc))
-		# 	if i - last_improvement > 1000:
-				# break
-		saver.restore(sess=session, save_path=save_path)
+				if best_validation_accuracy < acc:
+					best_validation_accuracy = acc
+					last_improvement = i
+					saver.save(sess=session, save_path=save_path)
+					print("Accuracy on Validation set is \t{}".format(acc))
+			if i - last_improvement > 1000:
+				break
+		if(restore):
+			saver.restore(sess=session, save_path=save_path)
 
 
 		x_test = data.test.images.reshape(data.test.images.shape[0], image_size, image_size, 1)
@@ -180,4 +181,4 @@ def main():
 
 
 if __name__ == '__main__':
-	main()
+	main(restore=False)
